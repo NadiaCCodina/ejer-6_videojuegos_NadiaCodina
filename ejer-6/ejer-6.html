@@ -31,15 +31,16 @@
             align-items: center;
             justify-content: center;
         }
-      #buttons{
-         justify-content: center;
-         align-items: center;
-      }
+
+        #buttons {
+            justify-content: center;
+            align-items: center;
+        }
     </style>
 </head>
 
 <body>
-    <div id = "buttons">
+    <div id="buttons">
         <button class="button" id="iniciar">
             Iniciar
         </button>
@@ -47,22 +48,23 @@
             Detener
         </button>
     </div>
-  
+
     <div class="score-board__item">
         <p>Tiempo</p>
         <p class="score-board__item-time">0</p>
     </div>
     <div id="game" style="width:500px;height:500px;border:2px solid black;position:relative;">
         <div id="player"
-            style="width: 30px; height: 30px; background: blue; border-radius: 50%; position: absolute; transform: translate(380px, 320px);">
+            style="width: 30px; height: 30px; background: blue; border-radius: 50%; position: absolute; ">
         </div>
         <div id="target"
             style="width: 30px; height: 30px; background: red; position: absolute; left: 26px; top: 458px;"></div>
+
+        <div id="target2"
+            style="width: 30px; height: 30px; background: rgb(255, 242, 0); position: absolute; left: 26px; top: 458px;">
+        </div>
     </div>
-    <div id="target2"
-        style="width: 30px; height: 30px; background: rgb(255, 242, 0); position: absolute; left: 26px; top: 458px;">
-    </div>
-    </div>
+
     <p>Puntaje: <span id="score">2</span></p>
 
 
@@ -100,7 +102,7 @@
             }
 
         }
-        randomPosition();
+       // randomPosition();
 
         document.getElementById("iniciar").addEventListener("click", e => {
             play();
@@ -111,10 +113,13 @@
             endGame();
         });
         function play() {
-
-            target2.style.opacity = 1;
+            randomPosition(1);
+              randomPosition(2);
             player.style.opacity = 1;
+           
+
             target.style.opacity = 1;
+             target2.style.opacity = 1;
             timeInterval = setInterval(updateTime, 1000);
             keyListener = (e) => {
                 if (e.key === "ArrowUp" && y > 0) y -= step;
