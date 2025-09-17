@@ -1,0 +1,182 @@
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <title>Document</title>
+
+    <style>
+        .button {
+            background-color: rgb(123, 123, 182);
+            border: none;
+            color: rgb(255, 255, 255);
+            padding: 16px 32px;
+            text-align: center;
+            text-decoration: none;
+            display: inline - block;
+            font-size: 16px;
+            margin: 4px 2px;
+            transition-duration: 0.4s;
+            cursor: pointer;
+        }
+
+        .score-board__item {
+            background-color: rgb(123, 123, 182);
+            display: flex;
+            gap: 2rem;
+            font-size: 2rem;
+            color: #eee;
+            width: 503px;
+            align-items: center;
+            justify-content: center;
+        }
+      #buttons{
+         justify-content: center;
+         align-items: center;
+      }
+    </style>
+</head>
+
+<body>
+    <div id = "buttons">
+        <button class="button" id="iniciar">
+            Iniciar
+        </button>
+        <button class="button" id="detener">
+            Detener
+        </button>
+    </div>
+  
+    <div class="score-board__item">
+        <p>Tiempo</p>
+        <p class="score-board__item-time">0</p>
+    </div>
+    <div id="game" style="width:500px;height:500px;border:2px solid black;position:relative;">
+        <div id="player"
+            style="width: 30px; height: 30px; background: blue; border-radius: 50%; position: absolute; transform: translate(380px, 320px);">
+        </div>
+        <div id="target"
+            style="width: 30px; height: 30px; background: red; position: absolute; left: 26px; top: 458px;"></div>
+    </div>
+    <div id="target2"
+        style="width: 30px; height: 30px; background: rgb(255, 242, 0); position: absolute; left: 26px; top: 458px;">
+    </div>
+    </div>
+    <p>Puntaje: <span id="score">2</span></p>
+
+
+    <script>
+        const game = document.getElementById("game");
+        const player = document.getElementById("player");
+        const target = document.getElementById("target");
+        const target2 = document.getElementById("target2");
+        const obstacle = document.getElementById("obstacle");
+        const scoreEl = document.getElementById("score");
+        const timer = document.querySelector('.score-board__item-time');
+        let keyListener = null;
+        player.style.opacity = 0;
+        target.style.opacity = 0;
+        target2.style.opacity = 0;
+        let totalTime = 11;
+        let timeInterval = null;
+        let x = 0, y = 0, score = 0;
+        const step = 20;
+
+        function randomPosition(targetN) {
+            console.log("target " + targetN)
+            console.log("target 1 " + target)
+            const maxX = game.clientWidth - target.clientWidth;
+            const maxY = game.clientHeight - target.clientHeight;
+            //Math.random() * maxX genera un número entre 0 y maxX (no incluye maxX).
+            // Math.floor(...) lo redondea a entero.
+            // target.style.left/top = ... + "px" coloca el objetivo en una posición absoluta dentro del contenedor.
+            if (targetN === 1) {
+                target.style.left = Math.floor(Math.random() * maxX) + "px";
+                target.style.top = Math.floor(Math.random() * maxY) + "px";
+            } else if (targetN === 2) {
+                target2.style.left = Math.floor(Math.random() * maxX) + "px";
+                target2.style.top = Math.floor(Math.random() * maxY) + "px";
+            }
+
+        }
+        randomPosition();
+
+        document.getElementById("iniciar").addEventListener("click", e => {
+            play();
+        });
+
+        document.getElementById("detener").addEventListener("click", e => {
+            totalTime = 11;
+            endGame();
+        });
+        function play() {
+
+            target2.style.opacity = 1;
+            player.style.opacity = 1;
+            target.style.opacity = 1;
+            timeInterval = setInterval(updateTime, 1000);
+            keyListener = (e) => {
+                if (e.key === "ArrowUp" && y > 0) y -= step;
+                // Las condiciones (y > 0, y < game.clientHeight - player.clientHeight) previenen que el jugador salga del contenedor.
+                if (e.key === "ArrowDown" && y < game.clientHeight - player.clientHeight) y += step;
+                if (e.key === "ArrowLeft" && x > 0) x -= step;
+                if (e.key === "ArrowRight" && x < game.clientWidth - player.clientWidth) x += step;
+                // mueve el jugador con CSStransform(es más performante que cambiarleft/top` en animaciones porque usa composición GPU).
+                player.style.transform = `translate(${x}px,${y}px)`;
+
+                // Colisión simple
+                const playerRect = player.getBoundingClientRect(); //devuelve la posición y tamaño del rectángulo del elemento relativo a la ventana (top, left, right, bottom). Se usa para detección de colisiones.
+                const targetRect = target.getBoundingClientRect();
+                const targetRect2 = target2.getBoundingClientRect();
+                // Detección de colisión (AABB - axis-aligned bounding box):
+                if (!(playerRect.right < targetRect.left ||
+                    playerRect.left > targetRect.right ||
+                    playerRect.bottom < targetRect.top ||
+                    playerRect.top > targetRect.bottom)) {
+                    score++;
+                    // Si no hay separación en ningún eje, entonces hay colisión. Al detectar, se incrementa score, se actualiza scoreEl.textContent y se llama a randomPosition() para mover el objetivo.
+                    scoreEl.textContent = score;
+                    randomPosition(1);
+
+                } if (!(playerRect.right < targetRect2.left ||
+                    playerRect.left > targetRect2.right ||
+                    playerRect.bottom < targetRect2.top ||
+                    playerRect.top > targetRect2.bottom)) {
+                    score++;
+                    // Si no hay separación en ningún eje, entonces hay colisión. Al detectar, se incrementa score, se actualiza scoreEl.textContent y se llama a randomPosition() para mover el objetivo.
+                    scoreEl.textContent = score;
+                    randomPosition(2);
+                }
+
+            };
+            document.addEventListener("keydown", keyListener);
+        }
+
+
+        function updateTime() {
+            if (totalTime >= 1) {
+                totalTime--
+                timer.textContent = totalTime;
+            } else {
+                timer.textContent = 0;
+                totalTime = 11;
+
+                endGame();
+                score = 0
+                    ;
+            }
+        }
+
+        function endGame() {
+            clearInterval(timeInterval);
+            document.removeEventListener("keydown", keyListener);
+
+            alert("⏳ ¡Fin del juego! Puntaje: " + score);
+        }
+    </script>
+
+
+</body>
+
+</html>
